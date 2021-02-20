@@ -7,15 +7,3 @@ Public Sub Button1_Click()
   Me.Close
 
 End
-
-Public Sub Button2_Click()
-
-  PictureBox2.Picture = Picture.Load("Resources/dieBlack1.png")
-
-End
-
-Public Sub Button3_Click()
-
-  PictureBox2.Picture = Null
-
-End

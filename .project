@@ -1,11 +1,15 @@
 # Gambas Project File 3.0
 Title=Догонялки
 Startup=frmNewGame
+Icon=Resources/pieceBlue_multi09.png
 Version=0.0.1
 Component=gb.image
 Component=gb.gui.qt
 Component=gb.form
 Component=gb.sdl2.audio
+Description="Игра в догонялки на шахматном поле"
+Authors="А.С.Куликов"
 TabSize=2
-Language=en_US
+Language=ru
+Vendor=justGLIP
 Packager=1

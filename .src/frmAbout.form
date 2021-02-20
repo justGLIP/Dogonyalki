@@ -1,7 +1,7 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,51,45)
+  MoveScaled(0,0,39,13)
   Text = ("О Программе")
   Icon = Picture["Resources/about.png"]
   Resizable = False
@@ -18,17 +18,5 @@
   { Button1 Button
     MoveScaled(13,8,11,4)
     Text = ("ОК")
-  }
-  { PictureBox2 PictureBox
-    MoveScaled(16,21,16,16)
-  }
-  { Button2 Button
-    MoveScaled(-1,23,16,4)
-  }
-  { Button3 Button
-    MoveScaled(34,22,16,4)
-  }
-  { TextLabel2 TextLabel
-    MoveScaled(13,34,24,4)
   }
 }

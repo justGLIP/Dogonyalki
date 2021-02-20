@@ -26,6 +26,7 @@ Public r As Byte[] = [3, 3, 3, 3]
 Public c As Byte[] = [1, 1, 1, 1]
 Public DiceImg As String[] = ["Green", "Blue", "Red", "Black"]
 Public turns As Short[] = [1, 1, 1, 1]
+Public colors As Integer[] = [&H00FF00, &H0000FF, &HFF0000, &H808080]
 
 Public Sub Form_Open()
 
@@ -69,7 +70,7 @@ Player = 0
 plPics = [picPl1, picPl2, picPl3, picPl4]
 
 
-Music.Load("Resources/Kai_Engel_-_09_-_Homeroad.mp3")
+Music.Load("Resources/Kai Engel - Satin(silent).mp3")
 Music.Play(-1)
    
 
@@ -111,17 +112,7 @@ If Me.h < Me.w Then 'если высота окна меньше ширины - 
   .h = .W
   .x = field[7, 7].x + (field[7, 7].w + 12)
   .y = field[7, 7].y + (field[7, 7].w + 12)
-  
-  'act = 0
-  'While frmNewGame.activePlayers[act] = False
-  '  act += 1
-  '  Player += 1
-  'Wend
-  
-    .Picture = Picture.Load("Resources/" & "die" & Str(DiceImg[Player]) & Str(1) & ".png")
-  '.Text = "1"
-  '.Border = False
-  
+  .Picture = Picture.Load("Resources/" & "die" & Str(DiceImg[Player]) & Str(1) & ".png")
   End With
   
   With lblInfo
@@ -138,7 +129,6 @@ If Me.h < Me.w Then 'если высота окна меньше ширины - 
   With framePlayers
     .X = field[7, 0].x + field[7, 0].w + 12
     .Y = field[7, 0].y
-    '.Background = &C0C0C0
     .h = field[0, 0].h * 8
     .W = btnDice.W
     .Arrangement = Arrange.Row
@@ -149,7 +139,6 @@ If Me.h < Me.w Then 'если высота окна меньше ширины - 
     .W = framePlayers.w - 12
     .h = .W
     .Picture = Picture.Load(chipsPics[0])
-    '.Stretch = True
     .Border = False
     .Expand = True
     .Text = "4"
@@ -160,7 +149,6 @@ If Me.h < Me.w Then 'если высота окна меньше ширины - 
     .W = framePlayers.w - 12
     .h = .W
     .Picture = Picture.Load(chipsPics[1])
-    '.Stretch = True
     .Border = False
     .Expand = True
     .Text = "4"
@@ -171,7 +159,6 @@ If Me.h < Me.w Then 'если высота окна меньше ширины - 
     .W = framePlayers.w - 12
     .h = .W
     .Picture = Picture.Load(chipsPics[2])
-    '.Stretch = True
     .Border = False
     .Expand = True
     .Text = "4"
@@ -182,7 +169,6 @@ If Me.h < Me.w Then 'если высота окна меньше ширины - 
     .W = framePlayers.w - 12
     .h = .W
     .Picture = Picture.Load(chipsPics[3])
-    '.Stretch = True
     .Border = False
     .Expand = True
     .Text = "4"
@@ -191,18 +177,15 @@ If Me.h < Me.w Then 'если высота окна меньше ширины - 
   
   Print frmNewGame.Names[0]
   lblInfo.Text = "Ход игрока: " & frmNewGame.Names[Player] & "       Всего игроков: " & frmNewGame.Players & Chr$(10) & Chr$(10) & "Ход номер: " & turns[Player]
-  
+  lblInfo.Background = colors[Player]
   
 End
 
 
 Public Sub btnDice_Click()
-  
-  
+  Dim SNext As Sound
   
   DiceThrow ' Получаем цифру на кубике
-  
-   
   
   'Если выпала шестерка (надо выставить новую фигуру или двигать существующую)
   If Dice = 6 Then 'Выпала 6?
@@ -212,9 +195,7 @@ Public Sub btnDice_Click()
         field[playerMoves[Player][0], playerMoves[Player][1]].Picture = Picture.Load(chipsPics[Player])
         field[playerMoves[Player][0], playerMoves[Player][1]].tag = "0" & Player
         plPics[Player].Text -= 1
-        'nadoHodit = False
         btnDice.Enabled = True
-        'btnDice.Design = False
         Return
       Endif
     Endif  
@@ -224,7 +205,6 @@ Public Sub btnDice_Click()
   
   If posMove Then 
     btnDice.Enabled = False
-    'btnDice.Design = True
     Return
   Else 
     If Dice = 6 Then Return
@@ -232,7 +212,13 @@ Public Sub btnDice_Click()
   
   ''ТУТ ЗАПУСК ФУНКЦИИ СМЕНЫ ИГРОКА
   nextPlayer
-  Message("Ход игрока " & Str(Player + 1), "Лады")
+  If mnuSound.Checked Then
+    SNext = Sound.Load("Resources/Next.wav")
+    SNext.Play
+  Endif
+  
+  'Message("Ход игрока " & Str(Player + 1), "Лады")
+  Wait (1)
   
   '' А ТУТ ЗАПУСК ФУНКЦИИ ХОДА КОМПА В КОТОРОЙ В НАЧАЛЕ ПРОВЕРКА НА ТО ЧТО ИГРОК - КОМП
   pcMove
@@ -258,7 +244,6 @@ Public Sub DiceThrow() 'бросаем кубик
   
   Randomize
   Dice = Int(Rnd(1, 7))
- ' btnDice.Text = Dice
   
   'анимация броска
    For i = 0 To 10
@@ -271,12 +256,12 @@ Public Sub DiceThrow() 'бросаем кубик
 End
 
 Public Sub Tile_MouseUp()
+
 If btnDice.Enabled Or pcPlayers[Player] Then Return
-'If btnDice.Design = False Or pcPlayers[Player] Then Return
-'Print "Click!!!"
-'lblInfo.Text = Last.tag
+
   Dim x1, y1 As Byte 'будущие тег и координаты
   Dim t1 As Short
+  Dim SNext As Sound
   t1 = Int(Val(Last.tag))
   x1 = ((t1 Div 10) + Dice) * 2
   y1 = x1 + 1
@@ -294,14 +279,13 @@ If btnDice.Enabled Or pcPlayers[Player] Then Return
   Else 
     If Last.Background = &HFFFF00 Then 'если клик в подсвеченное поле
       
-      ''ВСТАВИТЬ ПРОЦЕДУРУ СЪЕДАНИЯ
+
       If Last.tag <> "77" Then eat(playerMoves[Player][x0 + Dice * 2], playerMoves[Player][y0 + Dice * 2])
     
       Last.Picture = Picture.Load(chipsPics[Player])
       Last.tag = Str$(((t0 Div 10) + Dice) * 10 + Player) 
       field[playerMoves[Player][x0], playerMoves[Player][y0]].Picture = Null 'очищаем клетку откуда ушли
       field[playerMoves[Player][x0], playerMoves[Player][y0]].tag = "77" 'ставим там тег пустой клетки
-      'nadoHodit = False
       
       ''Закрытие бордюров
       If playerMoves[Player][x0] = 0 And playerMoves[Player][y0] = 7 Then Borders(0)
@@ -314,7 +298,12 @@ If btnDice.Enabled Or pcPlayers[Player] Then Return
       recolor
       If dice <> 6 Then
         nextPlayer
-        Message("Ход игрока " & Str(Player + 1), "Лады")
+        If mnuSound.Checked Then
+          SNext = Sound.Load("Resources/Next.wav")
+          SNext.Play
+        Endif
+        Wait 1
+        'Message("Ход игрока " & Str(Player + 1), "Лады")
         pcMove
       Endif
     Endif
@@ -360,8 +349,6 @@ Public Sub findChips()
   
   Dim a As Byte = 0
   Dim i, j, b As Byte
-  'Dim x As Byte[] = [3, 3, 3, 3]
-  'Dim y As Byte[] = [1, 1, 1, 1]
 
   'Находим фишки игрока на поле
     For i = 0 To 7
@@ -415,6 +402,7 @@ Public Sub nextPlayer()
   Wend
   If Player = 4 Then Player = 0
   lblInfo.Text = "Ход игрока: " & frmNewGame.Names[Player] & "       Всего игроков: " & frmNewGame.Players & Chr$(10) & Chr$(10) & "Ход номер: " & turns[Player]
+  lblInfo.Background = colors[Player]
   btnDice.Picture = Picture.Load("Resources/" & "die" & Str(DiceImg[Player]) & Str(Dice) & ".png")
 End
 
@@ -427,11 +415,11 @@ End
 Public Sub pcMove()
   
   Dim i, b As Short
+  Dim SNext As Sound
   
   While pcPlayers[Player]
     
     btnDice.Enabled = False
-    'btnDice.Design = True
     
     DiceThrow
     posMove = False
@@ -453,7 +441,14 @@ Public Sub pcMove()
     If Not posMove Then
       
       nextPlayer
-      Message("Ход игрока " & Str(Player + 1), "Лады")
+      'Message("Ход игрока " & Str(Player + 1), "Лады")
+      
+      If mnuSound.Checked Then
+        SNext = Sound.Load("Resources/Next.wav")
+        SNext.Play
+      Endif
+      Wait 1
+      
     Else
       findChips
       posMove = False
@@ -484,30 +479,72 @@ Public Sub pcMove()
       recolor
       If dice <> 6 Then
         nextPlayer
-        Message("Ход игрока " & Str(Player + 1), "Лады")
+        'Message("Ход игрока " & Str(Player + 1), "Лады")
+        If mnuSound.Checked Then
+          SNext = Sound.Load("Resources/Next.wav")
+          SNext.Play
+        Endif
+        Wait 1
+        
       Endif
     Endif
     
   Wend
   btnDice.Enabled = True
-  'btnDice.Design = False
+  
 End
 
 
 Public Sub eat(e As Byte, f As Byte)
-  
+Dim eat As Sound  
   If Int(Val(field[e, f].tag)) Mod 10 <> 8 Then
+    If mnuSound.Checked Then
+      eat = Sound.Load("Resources/eat.wav")
+      eat.Play
+    Endif
     plPics[Int(Val(field[e, f].tag)) Mod 10].Text += 1
   Endif
   
 End
 
 Public Sub checkWin()
+  Dim win As Sound
   
-  If field[0, 7].tag = "280" And field[1, 6].tag = "290" And field[2, 5].tag = "300" And field[3, 4].tag = "310" Then Message.Info("Игрок 1 победил!!!", "КРУТЯК!!!")
-  If field[0, 0].tag = "281" And field[1, 1].tag = "291" And field[2, 2].tag = "301" And field[3, 3].tag = "311" Then Message.Info("Игрок 2 победил!!!", "КРУТЯК!!!")
-  If field[7, 0].tag = "282" And field[6, 1].tag = "292" And field[5, 2].tag = "302" And field[4, 3].tag = "312" Then Message.Info("Игрок 3 победил!!!", "КРУТЯК!!!")
-  If field[7, 7].tag = "283" And field[6, 6].tag = "293" And field[5, 5].tag = "303" And field[4, 4].tag = "313" Then Message.Info("Игрок 4 победил!!!", "КРУТЯК!!!")
+  If field[0, 7].tag = "280" And field[1, 6].tag = "290" And field[2, 5].tag = "300" And field[3, 4].tag = "310" Then 
+    If mnuSound.Checked Then
+      win = Sound.Load("Resources/win.wav")
+      win.Play
+    Endif
+    Message.Info("Игрок 1 победил!!!", "КРУТЯК!!!")
+    Quit
+  Endif
+  
+  If field[0, 0].tag = "281" And field[1, 1].tag = "291" And field[2, 2].tag = "301" And field[3, 3].tag = "311" Then
+    If mnuSound.Checked Then
+      win = Sound.Load("Resources/win.wav")
+      win.Play
+    Endif
+    Message.Info("Игрок 2 победил!!!", "КРУТЯК!!!")
+    Quit
+  Endif
+  
+  If field[7, 0].tag = "282" And field[6, 1].tag = "292" And field[5, 2].tag = "302" And field[4, 3].tag = "312" Then
+    If mnuSound.Checked Then
+      win = Sound.Load("Resources/win.wav")
+      win.Play
+    Endif
+    Message.Info("Игрок 3 победил!!!", "КРУТЯК!!!")
+    Quit
+  Endif
+  
+  If field[7, 7].tag = "283" And field[6, 6].tag = "293" And field[5, 5].tag = "303" And field[4, 4].tag = "313" Then
+    If mnuSound.Checked Then
+      win = Sound.Load("Resources/win.wav")
+      win.Play
+    Endif
+    Message.Info("Игрок 4 победил!!!", "КРУТЯК!!!")
+    Quit
+  Endif
   
 End
 
@@ -539,8 +576,6 @@ Public Sub Borders(corner As Byte)
   
 End
 
-
-
 Public Sub mnuMusic_Click()
 
   If mnuMusic.Value Then Music.Play(-1) Else Music.Stop
@@ -548,7 +583,6 @@ Public Sub mnuMusic_Click()
 End
 
 Public Sub frmMain_Close()
-  
   
   Quit
   
