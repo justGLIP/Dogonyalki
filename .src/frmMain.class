@@ -1,0 +1,556 @@
+' Gambas class file
+
+Public field As New Object[8, 8]
+Public plPics As New Object[4] 'массив для картинок фишек игроков в рамке инфы об игроках
+Public btnDice As Button 'кнопка с кубиком
+Public lblInfo As Label
+Public framePlayers As Frame
+Public picPl1 As Button
+Public picPl2 As Button
+Public picPl3 As Button
+Public picPl4 As Button
+Public Dice As Byte
+Public pl1moves As Byte[] = [0, 7, 0, 6, 0, 5, 0, 4, 0, 3, 0, 2, 0, 1, 0, 0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 7, 1, 7, 2, 7, 3, 7, 4, 7, 5, 7, 6, 7, 7, 6, 7, 5, 7, 4, 7, 3, 7, 2, 7, 1, 7, 0, 7, 1, 6, 2, 5, 3, 4]
+Public pl2moves As Byte[] = [0, 0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 7, 1, 7, 2, 7, 3, 7, 4, 7, 5, 7, 6, 7, 7, 6, 7, 5, 7, 4, 7, 3, 7, 2, 7, 1, 7, 0, 7, 0, 6, 0, 5, 0, 4, 0, 3, 0, 2, 0, 1, 0, 0, 1, 1, 2, 2, 3, 3]
+Public pl3moves As Byte[] = [7, 0, 7, 1, 7, 2, 7, 3, 7, 4, 7, 5, 7, 6, 7, 7, 6, 7, 5, 7, 4, 7, 3, 7, 2, 7, 1, 7, 0, 7, 0, 6, 0, 5, 0, 4, 0, 3, 0, 2, 0, 1, 0, 0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 6, 1, 5, 2, 4, 3]
+Public pl4moves As Byte[] = [7, 7, 6, 7, 5, 7, 4, 7, 3, 7, 2, 7, 1, 7, 0, 7, 0, 6, 0, 5, 0, 4, 0, 3, 0, 2, 0, 1, 0, 0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 7, 1, 7, 2, 7, 3, 7, 4, 7, 5, 7, 6, 7, 7, 6, 6, 5, 5, 4, 4]
+Public playerMoves As Byte[][] = [pl1moves, pl2moves, pl3moves, pl4moves]
+Public Player As Byte
+Public pcPlayers As Boolean[] 
+Public x0 As Byte
+Public y0 As Byte
+Public t0 As Short
+Public posMove As Boolean = False
+Public chipsPics As String[] = ["Resources/chipGreenWhite_border.png", "Resources/chipBlueWhite_border.png", "Resources/chipRedWhite_border.png", "Resources/chipBlackWhite_border.png"]
+Public r As Byte[] = [3, 3, 3, 3]
+Public c As Byte[] = [1, 1, 1, 1]
+Public DiceImg As String[] = ["Green", "Blue", "Red", "Black"]
+Public turns As Short[] = [1, 1, 1, 1]
+
+Public Sub Form_Open()
+
+pcPlayers = [False, frmNewGame.RadioButton4.Value, frmNewGame.RadioButton6.Value, frmNewGame.RadioButton8.Value]
+Dim rr As Byte 'row
+Dim cc As Byte 'column
+Dim objTiles As PictureBox 'шахматные поля (квадратики)
+
+Me.h = Me.w
+Me.Center
+
+For rr = 0 To 7
+    For cc = 0 To 7
+      objTiles = New PictureBox(Me) As " " & rr & cc ' создаем поле 8*8 из PictureBox(ов)
+      objTiles.Stretch = True
+      objTiles.Tag = "77"
+      Object.Attach(objTiles, Me, "Tile")
+      field[rr, cc] = objTiles
+    Next '    cc
+Next '      rr
+  
+recolor
+  
+'рисуем бордюры
+For rr = 0 To 7
+    field[rr, rr].Picture = Picture.Load("Resources/pieceBlue_multi09.png")
+    field[rr, rr].tag = "88"
+    field[7 - rr, rr].Picture = Picture.Load("Resources/pieceBlue_multi09.png")
+    field[7 - rr, rr].tag = "88"
+Next
+
+
+btnDice = New Button(Me) As "BtnDice" 'создаем кнопку кубика
+lblInfo = New Label(Me) 'создаем лейбл для всякого текста снизу
+framePlayers = New Frame(Me) 'создаем рамку для инфы об игроках
+picPl1 = New Button(framePlayers)
+picPl2 = New Button(framePlayers)
+picPl3 = New Button(framePlayers)
+picPl4 = New Button(framePlayers)
+Player = 0
+plPics = [picPl1, picPl2, picPl3, picPl4]
+
+
+Music.Load("Resources/Kai_Engel_-_09_-_Homeroad.mp3")
+Music.Play(-1)
+   
+
+   
+End
+
+Public Sub Form_Resize()
+
+Dim rr As Byte 'row
+Dim cc As Byte 'column
+Dim act As Byte
+
+If Me.H >= Desktop.h Then Me.h = Desktop.h - 50
+
+If Me.h < Me.w Then 'если высота окна меньше ширины - подгоняем по высоте
+    For rr = 0 To 7
+      For cc = 0 To 7
+        field[rr, cc].H = (Me.h - 48) / 10
+        field[rr, cc].W = field[rr, cc].H
+        field[rr, cc].X = (Me.w / 2 - field[rr, cc].w * 5) + rr * field[rr, cc].W
+        field[rr, cc].Y = (((Me.h - 48) / 2) - (field[rr, cc].w * 5)) + cc * field[rr, cc].H
+        'field[r, c].Y = c * field[r, c].H
+      Next '    cc
+    Next '      rr
+  Else 'иначе - подгоняем по ширине
+    For rr = 0 To 7
+      For cc = 0 To 7
+        field[rr, cc].W = (Me.w - 48) / 10
+        field[rr, cc].H = field[rr, cc].W
+        field[rr, cc].X = (Me.w / 2 - field[rr, cc].w * 5) + rr * field[rr, cc].W
+        field[rr, cc].Y = (((Me.h - 48) / 2) - (field[rr, cc].w * 5)) + cc * field[rr, cc].H
+        'field[r, c].Y = c * field[r, c].H
+      Next '    cc
+    Next '      rr
+  Endif
+  
+  With btnDice
+  .w = field[0, 0].w * 2
+  .h = .W
+  .x = field[7, 7].x + (field[7, 7].w + 12)
+  .y = field[7, 7].y + (field[7, 7].w + 12)
+  
+  'act = 0
+  'While frmNewGame.activePlayers[act] = False
+  '  act += 1
+  '  Player += 1
+  'Wend
+  
+    .Picture = Picture.Load("Resources/" & "die" & Str(DiceImg[Player]) & Str(1) & ".png")
+  '.Text = "1"
+  '.Border = False
+  
+  End With
+  
+  With lblInfo
+    .X = field[0, 7].x
+    .y = field[0, 7].y + field[0, 7].h + 12
+    .Border = 1
+    .w = field[7, 0].w * 8
+    .h = field[7, 0].h * 2
+    .Text = posMove
+    .Alignment = 3
+    
+  End With
+  
+  With framePlayers
+    .X = field[7, 0].x + field[7, 0].w + 12
+    .Y = field[7, 0].y
+    '.Background = &C0C0C0
+    .h = field[0, 0].h * 8
+    .W = btnDice.W
+    .Arrangement = Arrange.Row
+    .Caption = "Фишки"
+  End With
+  
+  With picPl1
+    .W = framePlayers.w - 12
+    .h = .W
+    .Picture = Picture.Load(chipsPics[0])
+    '.Stretch = True
+    .Border = False
+    .Expand = True
+    .Text = "4"
+    .Design = True
+  End With
+  
+  With picPl2
+    .W = framePlayers.w - 12
+    .h = .W
+    .Picture = Picture.Load(chipsPics[1])
+    '.Stretch = True
+    .Border = False
+    .Expand = True
+    .Text = "4"
+    .Design = True
+  End With
+  
+  With picPl3
+    .W = framePlayers.w - 12
+    .h = .W
+    .Picture = Picture.Load(chipsPics[2])
+    '.Stretch = True
+    .Border = False
+    .Expand = True
+    .Text = "4"
+    .Design = True
+  End With
+  
+  With picPl4
+    .W = framePlayers.w - 12
+    .h = .W
+    .Picture = Picture.Load(chipsPics[3])
+    '.Stretch = True
+    .Border = False
+    .Expand = True
+    .Text = "4"
+    .Design = True
+  End With
+  
+  Print frmNewGame.Names[0]
+  lblInfo.Text = "Ход игрока: " & frmNewGame.Names[Player] & "       Всего игроков: " & frmNewGame.Players & Chr$(10) & Chr$(10) & "Ход номер: " & turns[Player]
+  
+  
+End
+
+
+Public Sub btnDice_Click()
+  
+  
+  
+  DiceThrow ' Получаем цифру на кубике
+  
+   
+  
+  'Если выпала шестерка (надо выставить новую фигуру или двигать существующую)
+  If Dice = 6 Then 'Выпала 6?
+    If field[playerMoves[Player][0], playerMoves[Player][1]].tag <> "0" & Player And Val(plPics[Player].Text) > 0 Then 'На старте не своя фишка и есть свободные фишки
+      If (Message.Question("Выставить новую фишку?", "Да", "Нет")) = 1 Then
+        If field[playerMoves[Player][0], playerMoves[Player][1]].tag <> "77" Then eat(playerMoves[Player][0], playerMoves[Player][1])
+        field[playerMoves[Player][0], playerMoves[Player][1]].Picture = Picture.Load(chipsPics[Player])
+        field[playerMoves[Player][0], playerMoves[Player][1]].tag = "0" & Player
+        plPics[Player].Text -= 1
+        'nadoHodit = False
+        btnDice.Enabled = True
+        'btnDice.Design = False
+        Return
+      Endif
+    Endif  
+  Endif
+  
+  checkMoves
+  
+  If posMove Then 
+    btnDice.Enabled = False
+    'btnDice.Design = True
+    Return
+  Else 
+    If Dice = 6 Then Return
+  Endif
+  
+  ''ТУТ ЗАПУСК ФУНКЦИИ СМЕНЫ ИГРОКА
+  nextPlayer
+  Message("Ход игрока " & Str(Player + 1), "Лады")
+  
+  '' А ТУТ ЗАПУСК ФУНКЦИИ ХОДА КОМПА В КОТОРОЙ В НАЧАЛЕ ПРОВЕРКА НА ТО ЧТО ИГРОК - КОМП
+  pcMove
+
+End
+
+
+Public Sub menuAbout_Click()
+
+  frmAbout.Show
+  
+End
+
+Public Sub DiceThrow() 'бросаем кубик
+
+  Dim i, j As Byte
+  
+  Dim throw As Sound
+  If mnuSound.Checked Then
+     throw = Sound.Load("Resources/diceThrow3.ogg")
+     throw.Play
+   Endif
+  
+  Randomize
+  Dice = Int(Rnd(1, 7))
+ ' btnDice.Text = Dice
+  
+  'анимация броска
+   For i = 0 To 10
+     j = Int(Rnd(1, 7))
+     btnDice.Picture = Picture.Load("Resources/" & "die" & Str(DiceImg[Player]) & Str(j) & ".png")
+     Wait 0.1
+   Next
+   btnDice.Picture = Picture.Load("Resources/" & "die" & Str(DiceImg[Player]) & Str(Dice) & ".png")
+  
+End
+
+Public Sub Tile_MouseUp()
+If btnDice.Enabled Or pcPlayers[Player] Then Return
+'If btnDice.Design = False Or pcPlayers[Player] Then Return
+'Print "Click!!!"
+'lblInfo.Text = Last.tag
+  Dim x1, y1 As Byte 'будущие тег и координаты
+  Dim t1 As Short
+  t1 = Int(Val(Last.tag))
+  x1 = ((t1 Div 10) + Dice) * 2
+  y1 = x1 + 1
+ 
+  If (t1 - Player) Mod 10 = 0 Then 'если клик в фишку 1го игрока
+    x0 = (t1 Div 10) * 2 'запоминаем координаты и тег откуда убираем фишку
+    y0 = x0 + 1
+    t0 = t1
+    
+    recolor
+    
+    checkMove(playerMoves[Player][x0], playerMoves[Player][y0])
+    
+    If posMove Then field[playerMoves[Player][x1], playerMoves[Player][y1]].Background = &HFFFF00 'подсвечиваем поле для хода
+  Else 
+    If Last.Background = &HFFFF00 Then 'если клик в подсвеченное поле
+      
+      ''ВСТАВИТЬ ПРОЦЕДУРУ СЪЕДАНИЯ
+      If Last.tag <> "77" Then eat(playerMoves[Player][x0 + Dice * 2], playerMoves[Player][y0 + Dice * 2])
+    
+      Last.Picture = Picture.Load(chipsPics[Player])
+      Last.tag = Str$(((t0 Div 10) + Dice) * 10 + Player) 
+      field[playerMoves[Player][x0], playerMoves[Player][y0]].Picture = Null 'очищаем клетку откуда ушли
+      field[playerMoves[Player][x0], playerMoves[Player][y0]].tag = "77" 'ставим там тег пустой клетки
+      'nadoHodit = False
+      
+      ''Закрытие бордюров
+      If playerMoves[Player][x0] = 0 And playerMoves[Player][y0] = 7 Then Borders(0)
+      If playerMoves[Player][x0] = 0 And playerMoves[Player][y0] = 0 Then Borders(1)
+      If playerMoves[Player][x0] = 7 And playerMoves[Player][y0] = 0 Then Borders(2)
+      If playerMoves[Player][x0] = 7 And playerMoves[Player][y0] = 7 Then Borders(3)
+      
+      btnDice.Enabled = True
+      'btnDice.Design = False
+      recolor
+      If dice <> 6 Then
+        nextPlayer
+        Message("Ход игрока " & Str(Player + 1), "Лады")
+        pcMove
+      Endif
+    Endif
+  recolor 'если кликнули никуда - перекрашиваем все поле
+  Endif
+  
+  
+  
+End
+
+
+Public Sub recolor()
+
+Dim rr, cc As Byte
+
+  'даем квадратикам разные цвета
+  For rr = 0 To 7
+    For cc = 0 To 7
+      If rr Mod 2 = 0 And cc Mod 2 = 0 Then field[rr, cc].Background = &HC05C00 Else field[rr, cc].Background = &HE0D1A7
+      If rr Mod 2 <> 0 And cc Mod 2 <> 0 Then field[rr, cc].Background = &HC05C00
+    Next
+  Next
+  
+End
+
+Public Sub checkMoves()
+  
+  Dim i As Byte
+  i = 0
+  posMove = False
+  findChips 'находим фишки игрока на поле и запоминаем их координаты в r[0-3],c[0-3]
+  
+  'Проверяем возможные ходы
+  While posMove = False And i < 4
+    checkMove(r[i], c[i]) 
+    i += 1
+  Wend
+  
+End
+
+
+Public Sub findChips()
+  
+  Dim a As Byte = 0
+  Dim i, j, b As Byte
+  'Dim x As Byte[] = [3, 3, 3, 3]
+  'Dim y As Byte[] = [1, 1, 1, 1]
+
+  'Находим фишки игрока на поле
+    For i = 0 To 7
+      For j = 0 To 7
+        b = Int(Val(field[i, j].tag)) Mod 10
+        If b = Player Then
+          r[a] = i
+          c[a] = j
+          a += 1
+        Endif
+      Next    
+    Next
+  
+End
+
+Public Sub checkMove(r0 As Byte, c0 As Byte)
+  
+  posMove = True
+  Dim b, i As Byte
+  b = Int(Val(field[r0, c0].tag)) Div 10 'номер хода
+  
+  'проверяем первую клетку - должна стоять фишка игрока
+  If (Int(Val(field[r0, c0].tag)) - Player) Mod 10 <> 0 Then
+    posMove = False
+    Return
+  Endif
+  
+  'если выпало больше, чем до захода в дом
+  If b + Dice > 31 Then
+    posMove = False
+    Return
+  Endif
+  
+  'проверяем занято ли по дороге
+  For i = b + 1 To b + (dice - 1)
+    If field[playerMoves[Player][i * 2], playerMoves[Player][i * 2 + 1]].tag <> "77" Then posMove = False 
+  Next
+  
+  'проверяем в конце - своя фишка?
+  If Int(Val(field[playerMoves[Player][(b + Dice) * 2], playerMoves[Player][(b + Dice) * 2 + 1]].tag)) Mod 10 = Player Then posMove = False 
+ 
+End
+
+Public Sub nextPlayer()
+  checkWin
+  turns[Player] += 1
+  Player += 1
+  If Player = 4 Then Player = 0
+  While Player < 4 And frmNewGame.activePlayers[Player] = False
+    Player += 1
+  Wend
+  If Player = 4 Then Player = 0
+  lblInfo.Text = "Ход игрока: " & frmNewGame.Names[Player] & "       Всего игроков: " & frmNewGame.Players & Chr$(10) & Chr$(10) & "Ход номер: " & turns[Player]
+  btnDice.Picture = Picture.Load("Resources/" & "die" & Str(DiceImg[Player]) & Str(Dice) & ".png")
+End
+
+Public Sub menuNew_Click()
+
+  frmNewGame.Show
+
+End
+
+Public Sub pcMove()
+  
+  Dim i, b As Short
+  
+  While pcPlayers[Player]
+    
+    btnDice.Enabled = False
+    'btnDice.Design = True
+    
+    DiceThrow
+    posMove = False
+    
+    While Dice = 6 And posmove = False
+      If Val(plPics[Player].Text) > 0 And field[playerMoves[Player][0], playerMoves[Player][1]].tag <> "0" & Player Then
+        If field[playerMoves[Player][0], playerMoves[Player][1]].tag <> "77" Then eat(playerMoves[Player][0], playerMoves[Player][1])
+        field[playerMoves[Player][0], playerMoves[Player][1]].Picture = Picture.Load(chipsPics[Player])
+        field[playerMoves[Player][0], playerMoves[Player][1]].tag = "0" & Player
+        plPics[Player].Text -= 1
+        Wait (1)
+      Else
+        checkMoves
+      Endif
+      If Not posMove Then DiceThrow
+    Wend
+    
+    checkMoves
+    If Not posMove Then
+      
+      nextPlayer
+      Message("Ход игрока " & Str(Player + 1), "Лады")
+    Else
+      findChips
+      posMove = False
+      i = -1
+      While i < 4 And posMove = False
+        i += 1
+        checkMove(r[i], c[i])
+      Wend
+      
+      b = Int(Val(field[r[i], c[i]].tag)) Div 10 'номер хода
+      field[playerMoves[Player][(b + Dice) * 2], playerMoves[Player][(b + Dice) * 2 + 1]].Background = &HFFFF00 'подсвечиваем поле для хода
+      Wait (1)
+      If field[playerMoves[Player][(b + Dice) * 2], playerMoves[Player][(b + Dice) * 2 + 1]].tag <> "77" Then eat(playerMoves[Player][(b + Dice) * 2], playerMoves[Player][(b + Dice) * 2 + 1])
+      
+      Dim t1 As Short
+      t1 = Int(Val(field[r[i], c[i]].tag))
+      field[playerMoves[Player][(b + Dice) * 2], playerMoves[Player][(b + Dice) * 2 + 1]].Picture = Picture.Load(chipsPics[Player])
+      field[playerMoves[Player][(b + Dice) * 2], playerMoves[Player][(b + Dice) * 2 + 1]].tag = Str$(((t1 Div 10) + Dice) * 10 + Player) 
+      field[r[i], c[i]].Picture = Null 'очищаем клетку откуда ушли
+      field[r[i], c[i]].tag = "77" 'ставим там тег пустой клетки
+      
+      ''Закрытие бордюров
+      If r[i] = 0 And c[i] = 7 Then Borders(0)
+      If r[i] = 0 And c[i] = 0 Then Borders(1)
+      If r[i] = 7 And c[i] = 0 Then Borders(2)
+      If r[i] = 7 And c[i] = 7 Then Borders(3)
+      
+      recolor
+      If dice <> 6 Then
+        nextPlayer
+        Message("Ход игрока " & Str(Player + 1), "Лады")
+      Endif
+    Endif
+    
+  Wend
+  btnDice.Enabled = True
+  'btnDice.Design = False
+End
+
+
+Public Sub eat(e As Byte, f As Byte)
+  
+  If Int(Val(field[e, f].tag)) Mod 10 <> 8 Then
+    plPics[Int(Val(field[e, f].tag)) Mod 10].Text += 1
+  Endif
+  
+End
+
+Public Sub checkWin()
+  
+  If field[0, 7].tag = "280" And field[1, 6].tag = "290" And field[2, 5].tag = "300" And field[3, 4].tag = "310" Then Message.Info("Игрок 1 победил!!!", "КРУТЯК!!!")
+  If field[0, 0].tag = "281" And field[1, 1].tag = "291" And field[2, 2].tag = "301" And field[3, 3].tag = "311" Then Message.Info("Игрок 2 победил!!!", "КРУТЯК!!!")
+  If field[7, 0].tag = "282" And field[6, 1].tag = "292" And field[5, 2].tag = "302" And field[4, 3].tag = "312" Then Message.Info("Игрок 3 победил!!!", "КРУТЯК!!!")
+  If field[7, 7].tag = "283" And field[6, 6].tag = "293" And field[5, 5].tag = "303" And field[4, 4].tag = "313" Then Message.Info("Игрок 4 победил!!!", "КРУТЯК!!!")
+  
+End
+
+Public Sub Borders(corner As Byte)
+  
+  If field[playerMoves[corner][62], playerMoves[corner][63]].tag = "88" Then
+    field[playerMoves[corner][62], playerMoves[corner][63]].Picture = Null
+    field[playerMoves[corner][62], playerMoves[corner][63]].tag = "77"
+    field[playerMoves[corner][0], playerMoves[corner][1]].Picture = Picture.Load("Resources/pieceBlue_multi09.png")
+    field[playerMoves[corner][0], playerMoves[corner][1]].tag = "88"
+    Return
+  Endif
+  
+  If field[playerMoves[corner][60], playerMoves[corner][61]].tag = "88" Then
+    field[playerMoves[corner][60], playerMoves[corner][61]].Picture = Null
+    field[playerMoves[corner][60], playerMoves[corner][61]].tag = "77"
+    field[playerMoves[corner][0], playerMoves[corner][1]].Picture = Picture.Load("Resources/pieceBlue_multi09.png")
+    field[playerMoves[corner][0], playerMoves[corner][1]].tag = "88"
+    Return
+  Endif
+  
+  If field[playerMoves[corner][58], playerMoves[corner][59]].tag = "88" Then
+    field[playerMoves[corner][58], playerMoves[corner][59]].Picture = Null
+    field[playerMoves[corner][58], playerMoves[corner][59]].tag = "77"
+    field[playerMoves[corner][0], playerMoves[corner][1]].Picture = Picture.Load("Resources/pieceBlue_multi09.png")
+    field[playerMoves[corner][0], playerMoves[corner][1]].tag = "88"
+  Endif
+  
+  
+End
+
+
+
+Public Sub mnuMusic_Click()
+
+  If mnuMusic.Value Then Music.Play(-1) Else Music.Stop
+
+End
+
+Public Sub frmMain_Close()
+  
+  
+  Quit
+  
+End
+

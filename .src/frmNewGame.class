@@ -1,0 +1,52 @@
+' Gambas class file
+
+Public Players As Byte = 1
+Public Names As String[]
+Public activePlayers As Boolean[]
+
+Public Sub CheckBox2_Click()
+
+  TextBox2.Enabled = CheckBox2.Value
+  RadioButton3.Enabled = CheckBox2.Value
+  RadioButton4.Enabled = CheckBox2.Value
+
+End
+
+Public Sub CheckBox3_Click()
+
+  TextBox3.Enabled = CheckBox3.Value
+  RadioButton5.Enabled = CheckBox3.Value
+  RadioButton6.Enabled = CheckBox3.Value
+
+End
+
+Public Sub CheckBox4_Click()
+
+  TextBox4.Enabled = CheckBox4.Value
+  RadioButton7.Enabled = CheckBox4.Value
+  RadioButton8.Enabled = CheckBox4.Value
+
+End
+
+Public Sub btnStart_Click()
+  
+  'If CheckBox1.Value Then Players += 1
+  If CheckBox2.Value Then Players += 1
+  If CheckBox3.Value Then Players += 1
+  If CheckBox4.Value Then Players += 1
+  
+  If Players = 0 Then
+   Message("Должен быть хоть один игрок")
+   Return
+  Endif
+  
+  Names = [TextBox1.Text, TextBox2.Text, TextBox3.Text, TextBox4.Text]
+  activePlayers = [True, CheckBox2.Value, CheckBox3.Value, CheckBox4.Value, False]
+  'Print Names[0]
+  Me.Hide
+  frmMain.Show
+'  frmMain.Resize
+
+End
+
+

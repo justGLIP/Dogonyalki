@@ -1,0 +1,30 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,67.7143,64)
+  { menuGame Menu
+    Text = ("Игра")
+    { menuNew Menu
+      Text = ("Новая")
+    }
+  }
+  { mnuOptions Menu
+    Text = ("Опции")
+    { mnuSound Menu
+      Text = ("Звук")
+      Toggle = True
+      Checked = True
+    }
+    { mnuMusic Menu
+      Text = ("Музыка")
+      Toggle = True
+      Checked = True
+    }
+  }
+  { menuHelp Menu
+    Text = ("Справка")
+    { menuAbout Menu
+      Text = ("О программе")
+    }
+  }
+}

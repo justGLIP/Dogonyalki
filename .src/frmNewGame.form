@@ -1,0 +1,97 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,64,64)
+  Text = ("Новая игра")
+  Arrangement = Arrange.Vertical
+  AutoResize = True
+  Margin = True
+  { Panel1 Panel
+    MoveScaled(1,8,61,6)
+    { !TextBox1 TextBox
+      MoveScaled(26,1,24,4)
+      #Public = True
+      Tracking = True
+      Text = ("Игрок 1")
+    }
+    { Label1 Label
+      MoveScaled(15,1,10,4)
+      Text = ("Ваше имя:")
+    }
+  }
+  { Panel2 Panel
+    MoveScaled(1,17,61,6)
+    { CheckBox2 CheckBox
+      MoveScaled(1,2,3,4)
+    }
+    { TextBox2 TextBox
+      MoveScaled(5,2,24,4)
+      Enabled = False
+      Text = ("Игрок 2")
+    }
+    { RadioButton3 RadioButton
+      MoveScaled(30,2,24,4)
+      Enabled = False
+      Text = ("Человек")
+    }
+    { !RadioButton4 RadioButton
+      MoveScaled(43,2,24,4)
+      #Public = True
+      Enabled = False
+      Text = ("Компьютер")
+      Value = True
+    }
+  }
+  { Panel3 Panel
+    MoveScaled(1,26,61,6)
+    { CheckBox3 CheckBox
+      MoveScaled(1,2,3,4)
+    }
+    { TextBox3 TextBox
+      MoveScaled(5,2,24,4)
+      Enabled = False
+      Text = ("Игрок 3")
+    }
+    { RadioButton5 RadioButton
+      MoveScaled(30,2,24,4)
+      Enabled = False
+      Text = ("Человек")
+    }
+    { !RadioButton6 RadioButton
+      MoveScaled(43,2,24,4)
+      #Public = True
+      Enabled = False
+      Text = ("Компьютер")
+      Value = True
+    }
+  }
+  { Panel4 Panel
+    MoveScaled(1,35,61,8)
+    { CheckBox4 CheckBox
+      MoveScaled(1,2,3,4)
+    }
+    { TextBox4 TextBox
+      MoveScaled(5,2,24,4)
+      Enabled = False
+      Text = ("Игрок 4")
+    }
+    { RadioButton7 RadioButton
+      MoveScaled(30,2,24,4)
+      Enabled = False
+      Text = ("Человек")
+    }
+    { !RadioButton8 RadioButton
+      MoveScaled(43,2,24,4)
+      #Public = True
+      Enabled = False
+      Text = ("Компьютер")
+      Value = True
+    }
+  }
+  { btnStart Button
+    MoveScaled(20,46,16,4)
+    AutoResize = True
+    Text = ("Старт")
+    Default = True
+  }
+}
